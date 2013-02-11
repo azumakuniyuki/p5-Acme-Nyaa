@@ -2,7 +2,7 @@ use inc::Module::Install;
 name 'Acme-Nyaa';
 all_from 'lib/Acme/Nyaa.pm';
 
-# requires '';
+requires 'Module::Load';
 
 tests 't/*.t';
 author_tests 'xt';
