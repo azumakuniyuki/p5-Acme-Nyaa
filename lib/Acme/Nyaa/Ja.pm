@@ -135,15 +135,25 @@ sub neko
 	my $sizec = scalar @$Cats;
 	return q() unless length $text1;
 
-	$text1 =~ s{\A[神]\z}{ネコ};
-	$text1 =~ s{\A[神]($RxHiragana)}{ネコ$1};
-	$text1 =~ s{\A[神]($RxKatakana)}{ネコ$1};
-	$text1 =~ s{($RxHiragana)[神]($RxHiragana)}{$1ネコ$2}g;
-	$text1 =~ s{($RxHiragana)[神]($RxKatakana)}{$1ネコ$2}g;
-	$text1 =~ s{($RxKatakana)[神]($RxKatakana)}{$1ネコ$2}g;
-	$text1 =~ s{($RxKatakana)[神]($RxHiragana)}{$1ネコ$2}g;
-	$text1 =~ s{($RxHiragana)[神]($RxPeriod|$RxComma)?\z}{$1ネコ$2}g;
-	$text1 =~ s{($RxKatakana)[神]($RxPeriod|$RxComma)?\z}{$1ネコ$2}g;
+	my $map = {
+		'神' => 'ネコ',
+	};
+
+	foreach my $e ( keys %$map )
+	{
+		next unless $text1 =~ m{$e};
+		my $f = $map->{ $e };
+
+		$text1 =~ s{\A[$e]\z}{$f};
+		$text1 =~ s{\A[$e]($RxHiragana)}{$f$1};
+		$text1 =~ s{\A[$e]($RxKatakana)}{$f$1};
+		$text1 =~ s{($RxHiragana)[$e]($RxHiragana)}{$1$f$2}g;
+		$text1 =~ s{($RxHiragana)[$e]($RxKatakana)}{$1$f$2}g;
+		$text1 =~ s{($RxKatakana)[$e]($RxKatakana)}{$1$f$2}g;
+		$text1 =~ s{($RxKatakana)[$e]($RxHiragana)}{$1$f$2}g;
+		$text1 =~ s{($RxHiragana)[$e]($RxPeriod|$RxComma)?\z}{$1$f$2}g;
+		$text1 =~ s{($RxKatakana)[$e]($RxPeriod|$RxComma)?\z}{$1$f$2}g;
+	}
 
 	return $text1;
 }
@@ -177,6 +187,7 @@ Acme::Nyaa - Convert texts like which a cat is talking in Japanese
 azumakuniyuki E<lt>perl.org@azumakuniyuki.orgE<gt>
 
 =head1 SEE ALSO
+L<Acme::Nyaa>
 
 =head1 LICENSE
 
