@@ -1,6 +1,6 @@
 use strict;
 use utf8;
-use Test::More 'tests' => 78;
+use Test::More 'tests' => 83;
 use Encode;
 
 BEGIN { use_ok 'Acme::Nyaa' }
@@ -57,8 +57,7 @@ my $conversation = [
 	'細君は主人に尻を向けて――なに失礼な細君だ？',
 ];
 
-my $wordlist = [
-	'神',
+my $messages = [
 	'神と和解せよ',
 	'神のさばきは突然にくる',
 	'不倫や姦淫を神はさばく',
@@ -72,6 +71,15 @@ my $wordlist = [
 	'神は世をさばく日を定めた',
 ];
 
+my $wordlist = [
+	'神',
+	'八坂神社',
+	'天照大神',
+	'兵庫県神戸市',
+	'八百万の神々',
+	'神と化す',
+];
+
 my $english = [
 	'Perl 5 is a highly capable, feature-rich programming language with over 24 years of development. ',
 	'With free online books, over 25,000 extension modules, and a large developer community, there are many ways to learn Perl 5.'
@@ -81,7 +89,7 @@ foreach my $e ( @$textlist )
 {
 	my $text0 = $e;
 	my $text1 = $sabatora->cat( \$text0 );
-	my $text2 = $sabatora->cat( \$text1 );
+	my $text2 = $sabatora->cat( $text1 );
 	ok( $text1, sprintf( "%s => %s", e($e), e($text1) ) );
 	is( $text2, $text1, sprintf( "%s == %s", e($text2), e($text1) ) );
 }
@@ -90,7 +98,7 @@ foreach my $e ( @$sentence )
 {
 	my $text0 = $e;
 	my $text1 = $sabatora->cat( \$text0 );
-	my $text2 = $sabatora->cat( \$text1 );
+	my $text2 = $sabatora->cat( $text1 );
 	ok( $text1, e($text1) );
 	is( $text2, $text1, '->cat() again' );
 }
@@ -99,15 +107,23 @@ foreach my $e ( @$conversation )
 {
 	my $text0 = $e;
 	my $text1 = $sabatora->cat( \$text0 );
-	my $text2 = $sabatora->cat( \$text1 );
+	my $text2 = $sabatora->cat( $text1 );
 	ok( $text1, e($text1) );
+}
+
+foreach my $e ( @$messages )
+{
+	my $text0 = $e;
+	my $text1 = $sabatora->neko( \$text0 );
+	my $text2 = $sabatora->neko( $text1 );
+	ok( $text1, sprintf( "%s => %s", e($text0), e($text1) ) );
 }
 
 foreach my $e ( @$wordlist )
 {
 	my $text0 = $e;
 	my $text1 = $sabatora->neko( \$text0 );
-	my $text2 = $sabatora->neko( \$text1 );
+	my $text2 = $sabatora->neko( $text1 );
 	ok( $text1, sprintf( "%s => %s", e($text0), e($text1) ) );
 }
 
