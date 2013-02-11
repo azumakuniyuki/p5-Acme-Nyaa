@@ -171,7 +171,7 @@ Acme::Nyaa - Convert texts like which a cat is talking in Japanese
 
   use Acme::Nyaa;
 
-  my $kijitora = Acme::Nyaa->new;
+  my $kijitora = Acme::Nyaa->new( 'language' => 'ja' );
 
   print $kijitora->cat( \'猫がかわいい。' ); # => 猫がかわいいニャー。
   print $kijitora->neko( \'神と和解せよ' ); # => ネコと和解せよ
@@ -182,9 +182,25 @@ Acme::Nyaa - Convert texts like which a cat is talking in Japanese
   Acme::Nyaa is a converter which translate Japanese texts to texts
   like which a cat talking.
 
+=head1 METHODS
+
+=over
+
+=item new
+  new() is a constructor of Acme::Nyaa
+
+=item cat
+  cat() is a converter that appends string "ニャー" at the end of
+  each sentence.
+
+=item neko
+  neko() is a converter that replace a noun with 'ネコ'.
+
+=back
+
 =head1 AUTHOR
 
-azumakuniyuki E<lt>perl.org@azumakuniyuki.orgE<gt>
+azumakuniyuki E<lt>perl.org [at] azumakuniyuki.orgE<gt>
 
 =head1 SEE ALSO
 L<Acme::Nyaa>

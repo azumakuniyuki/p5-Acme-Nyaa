@@ -95,9 +95,25 @@ Acme::Nyaa - Convert texts like which a cat is talking in Japanese
 
   Nyaa is "ニャー", Cats living in Japan meows "nyaa".
 
+=head1 METHODS
+
+=over
+
+=item new
+  new() is a constructor of Acme::Nyaa
+
+=item cat
+  cat() is a converter that appends string "ニャー" at the end of
+  each sentence.
+
+=item neko
+  neko() is a converter that replace a noun with 'ネコ'.
+
+=back
+
 =head1 AUTHOR
 
-azumakuniyuki E<lt>perl.org@azumakuniyuki.orgE<gt>
+azumakuniyuki E<lt>perl.org [at] azumakuniyuki.orgE<gt>
 
 =head1 SEE ALSO
 
