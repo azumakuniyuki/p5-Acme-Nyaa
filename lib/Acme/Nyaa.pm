@@ -93,6 +93,8 @@ Acme::Nyaa - Convert texts like which a cat is talking in Japanese
   Acme::Nyaa is a converter which translate Japanese texts to texts
   like which a cat talking.
 
+  Nyaa is "ニャー", Cats living in Japan meows "nyaa".
+
 =head1 AUTHOR
 
 azumakuniyuki E<lt>perl.org@azumakuniyuki.orgE<gt>
