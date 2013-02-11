@@ -1,6 +1,6 @@
 use inc::Module::Install;
-name 'Acme-Cat';
-all_from 'lib/Acme/Cat.pm';
+name 'Acme-Nyaa';
+all_from 'lib/Acme/Nyaa.pm';
 
 # requires '';
 
