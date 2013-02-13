@@ -1,4 +1,8 @@
 Revision history for Perl extension Acme::Nyaa
 
-0.01    Sat Feb 11 17:00:00 2013
-        - First release
+0.0.2	
+	- use version;
+	- Support EUC-JP, ISO-2022-JP, and Shift-JIS.
+
+0.01	Sat Feb 11 17:00:00 2013
+	- First release
