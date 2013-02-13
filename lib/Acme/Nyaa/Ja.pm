@@ -5,11 +5,14 @@ use utf8;
 use Encode;
 use Encode::Guess qw(shift-jis euc-jp 7bit-jis);;
 
-my $RxComma = qr/[、,]/;
-my $RxPeriod = qr/[。.]/;
+my $RxComma = qr/[、(?:,\s+)]/;
+my $RxPeriod = qr/[。]/;
+my $RxEndOfList = qr#[）)-=+|}＞>/:;"'`\]]#;
 my $RxConversation = qr/[「『].+[」』]/;
-my $RxEndOfSentence = qr/[!！?？(?:...)(?:。。。)(?:,,,)(?:、、、)…]+/;
+my $RxEndOfSentence = qr/(?:[!！?？…]+|[.]{2,}|[。]{2,}|[、]{2,}|[,]{2,})/;
+
 my $Cats = [ '猫', 'ネコ', 'ねこ' ];
+my $Separator = qq(\x1f\x1f\x1f);
 my $HiraganaNya = 'にゃ';
 my $KatakanaNya = 'ニャ';
 my $FightingCats = [
@@ -20,8 +23,15 @@ my $FightingCats = [
 	'「マーーーオ!!」',
 	'「マーーーーオ!!!」',
 ];
-my $HiraganaTails = [ 'にゃ', 'にゃー', 'にゃ〜', 'にゃぁ', 'にゃん', 'にゃーん', 'にゃ〜ん' ];
-my $KatakanaTails = [ 'ニャ', 'ニャー', 'ニャ〜', 'ニャァ', 'ニャん', 'ニャーん', 'ニャ〜ん' ];
+my $Copulae = [ 'だ', 'です', 'である', 'どす', 'かもしれない', 'らしい', 'ようだ' ];
+my $HiraganaTails = [ 
+	'にゃ', 'にゃー', 'にゃ〜', 'にゃーーーー!', 'にゃん', 'にゃーん', 'にゃ〜ん', 
+	'にゃー!', 'にゃーーー!!', 'にゃーー!',
+];
+my $KatakanaTails = [
+	'ニャ', 'ニャー', 'ニャ〜', 'ニャーーーー!', 'ニャん', 'ニャーん', 'ニャ〜ん',
+	'ニャー!', 'ニャーーー!!', 'ニャーー!', 
+];
 my $DoNotBecomeCat = [
 	# See http://ja.wikipedia.org/wiki/モーニング娘。
 	'モーニング娘。',
@@ -40,78 +50,104 @@ sub cat
 	my $class = shift;
 	my $text0 = shift;
 	my $text1 = undef;
+	my $text2 = undef;
 	my $bless = ref $text0;
 
 	return q() if( $bless ne '' && $bless ne 'SCALAR' );
 	$text1 = $bless eq 'SCALAR' ? $$text0 : $text0;
 	return q() unless length $text1;
 
-	my $cname = __PACKAGE__->_reckon( \$text1 );
+	my $cname = __PACKAGE__->_reckon( \$text1 ) || 'utf8';
 	my $uflag = $cname eq 'utf8' ? utf8::is_utf8 $text1 : undef;
 
-	return $text1 unless $cname;
-	$text1 =  __PACKAGE__->_toutf8( $text1, $cname, $uflag );
-	$text1 =~ s{($RxPeriod)}{$1\x1f}g;
+	# return $text1 unless $cname;
+	eval { $text2 =  __PACKAGE__->_toutf8( $text1, $cname, $uflag ); };
+	return $text1 if $@;
+
+	$text2 =~ s{($RxPeriod)}{$1$Separator}g;
+	$text2 .= $Separator unless $text2 =~ m{$Separator};
 
 	my $sizeh = scalar @$HiraganaTails;
 	my $sizek = scalar @$KatakanaTails;
 	my $index = 0;
-	my $lines = [ split( /\x1F/, $text1 ) ];
+	my $gauge = 0;
+	my $chomp = 0;
+	my $lines = [ split( $Separator, $text2 ) ];
 
 	foreach my $e ( @$lines )
 	{
-		next if $e =~ qr/\A$RxPeriod\z/;
-		next if grep { $e eq $_ } @$DoNotBecomeCat;
+		next if $e =~ m/\A$RxPeriod\s*\z/;
+		next if $e =~ m/$RxEndOfList\s*\z/;
+		next if grep { $e =~ m/\A$_\s*/ } @$DoNotBecomeCat;
 		next if grep { $e =~ m/$_$RxPeriod?\z/ } @$HiraganaTails;
 		next if grep { $e =~ m/$_$RxPeriod?\z/ } @$KatakanaTails;
-		next if grep { $e =~ m/$_$RxEndOfSentence?\z/ } @$HiraganaTails;
-		next if grep { $e =~ m/$_$RxEndOfSentence?\z/ } @$KatakanaTails;
-		next if grep { $e =~ m/$_\z/ } @$FightingCats;
+		next if grep { $e =~ m/$_$RxEndOfSentence?\s*\z/ } @$HiraganaTails;
+		next if grep { $e =~ m/$_$RxEndOfSentence?\s*\z/ } @$KatakanaTails;
+		next if grep { $e =~ m/$_\s*\z/ } @$FightingCats;
 
 		next if $e =~ m{\A[\x20-\x7E]+\z};
+
+		# ひらがな、またはカタカナが入ってないなら次へ
 		next unless $e =~ m{[\p{InHiragana}\p{InKatakana}]+};
 
-		if( $e =~ m/な($RxPeriod?)\z/ )
+		# 「ね」の後ろにニャーがあると猫が喋りにくそう
+		next if $e =~ m{[ねネ]$RxPeriod?\s*\z};
+
+		$chomp = chomp $e;
+
+		if( $e =~ m/な$RxPeriod?\s*\z/ )
 		{
 			# な => にゃー
-			$e =~ s/な($RxPeriod?)\z/$HiraganaNya$1/;
+			$e =~ s/な($RxPeriod?)(\s*)\z/$HiraganaNya$1$2/;
 		}
-		elsif( $e =~ m/ナ($RxPeriod?)\z/ )
+		elsif( $e =~ m/ナ$RxPeriod?\s*\z/ )
 		{
 			# ナ => ニャー
-			$e =~ s/ナ($RxPeriod?)\z/$HiraganaNya$1/;
+			$e =~ s/ナ($RxPeriod?)(\s*)\z/$HiraganaNya$1$2/;
 		}
-		elsif( $e =~ m/\p{InHiragana}$RxPeriod\z/ )
+		elsif( $e =~ m/\p{InHiragana}$RxPeriod\s*\z/ )
 		{
 			$index = int rand $sizek;
-			$e =~ s/($RxPeriod)\z/$KatakanaTails->[ $index ]$1/;
+			$e =~ s/($RxPeriod)(\s*)\z/$KatakanaTails->[ $index ]$1$2/;
 		}
-		elsif( $e =~ m/\p{InKatakana}$RxPeriod\z/ )
+		elsif( $e =~ m/\p{InKatakana}$RxPeriod\s*\z/ )
 		{
 			$index = int rand $sizeh;
-			$e =~ s/($RxPeriod)\z/$HiraganaTails->[ $index ]$1/;
+			$e =~ s/($RxPeriod)(\s*)\z/$HiraganaTails->[ $index ]$1$2/;
+		}
+		elsif( $e =~ m/\p{InCJKUnifiedIdeographs}$RxPeriod?\s*\z/ )
+		{
+			$index = int rand $sizeh;
+			$gauge = int rand scalar @$Copulae;
+			$e =~ s/($RxPeriod?)(\s*)\z/$Copulae->[ $gauge ]$KatakanaTails->[ $index ]$1$2/;
 		}
 		else
 		{
-			if( $e =~ m/($RxEndOfSentence)\z/ )
+			if( $e =~ m/($RxEndOfSentence)\s*\z/ )
 			{
 				# ... => ニャー..., ! => ニャ!
 				my $eos = $1;
-				if( $e =~ m/\p{InKatakana}$RxEndOfSentence\z/ )
+				if( $e =~ m/\p{InKatakana}$RxEndOfSentence\s*\z/ )
 				{
 					$index = int rand( $sizeh / 2 );
 					$e =~ s/$RxEndOfSentence/$HiraganaTails->[ $index ]$eos/g;
 				}
-				else
+				elsif( $e =~ m/\p{InHiragana}$RxEndOfSentence\s*\z/ )
 				{
 					$index = int rand( $sizek / 2 );
 					$e =~ s/$RxEndOfSentence/$KatakanaTails->[ $index ]$eos/g;
 				}
+				else
+				{
+					$index = int rand( $sizek / 2 );
+					$gauge = int rand( scalar @$Copulae );
+					$e =~ s/$RxEndOfSentence/$Copulae->[ $gauge ]$KatakanaTails->[ $index ]$eos/g;
+				}
 			}
-			elsif( $e =~ m/$RxConversation\z/ )
+			elsif( $e =~ m/$RxConversation\s*\z/ )
 			{
 				# 0.5の確率で会話の後ろで猫が喧嘩をする
-				if( $e =~ m/\A(.*$RxConversation\s*)($RxConversation.*)\z/ )
+				if( $e =~ m/\A(.*$RxConversation[ ]*)($RxConversation.*)\s*\z/ )
 				{
 					$index = int rand scalar @$FightingCats;
 					$e = $1.$FightingCats->[ $index ].$2 if int(rand(10)) % 2;
@@ -122,10 +158,26 @@ sub cat
 			else
 			{
 				$index = int rand $sizek;
-				$e .= $KatakanaTails->[ $index ];
+
+				if( $e =~ m/[0-9\p{Latin}]\s*\z/ )
+				{
+					$gauge = int rand scalar @$Copulae;
+					$e =~ s/(\s*?)\z/ $Copulae->[ $gauge ]$KatakanaTails->[ $index ]$1/;
+				}
+				elsif( $e =~ m/\p{InKatakana}\s*\z/ )
+				{
+					$e =~ s/(\s*?)\z/$HiraganaTails->[ $index ]$1/;
+				}
+				else
+				{
+					$e =~ s/(\s*?)\z/$KatakanaTails->[ $index ]$1/;
+				}
 			}
 		}
-	}
+
+		$e .= qq(\n) if $chomp;
+
+	} # End of foreach(@$lines)
 
 	return __PACKAGE__->_utf8to( join( '', @$lines ), $cname, $uflag );
 }
@@ -135,17 +187,18 @@ sub neko
 	my $class = shift;
 	my $text0 = shift;
 	my $text1 = undef;
+	my $text2 = undef;
 	my $bless = ref $text0;
 
 	return q() if( $bless ne '' && $bless ne 'SCALAR' );
 	$text1 = $bless eq 'SCALAR' ? $$text0 : $text0;
 	return q() unless length $text1;
 
-	my $cname = __PACKAGE__->_reckon( \$text1 );
+	my $cname = __PACKAGE__->_reckon( \$text1 ) || 'utf8';
 	my $uflag = $cname eq 'utf8' ? utf8::is_utf8 $text1 : undef;
 
-	return $text1 unless $cname;
-	$text1 = __PACKAGE__->_toutf8( $text1, $cname, $uflag );
+	eval { $text2 = __PACKAGE__->_toutf8( $text1, $cname, $uflag ); };
+	return $text1 if $@;
 
 	my $map = {
 		'神' => 'ネコ',
@@ -153,21 +206,21 @@ sub neko
 
 	foreach my $e ( keys %$map )
 	{
-		next unless $text1 =~ m{$e};
+		next unless $text2 =~ m{$e};
 		my $f = $map->{ $e };
 
-		$text1 =~ s{\A[$e]\z}{$f};
-		$text1 =~ s{\A[$e](\p{InHiragana})}{$f$1};
-		$text1 =~ s{\A[$e](\p{InKatakana})}{$f$1};
-		$text1 =~ s{(\p{InHiragana})[$e](\p{InHiragana})}{$1$f$2}g;
-		$text1 =~ s{(\p{InHiragana})[$e](\p{InKatakana})}{$1$f$2}g;
-		$text1 =~ s{(\p{InKatakana})[$e](\p{InKatakana})}{$1$f$2}g;
-		$text1 =~ s{(\p{InKatakana})[$e](\p{InHiragana})}{$1$f$2}g;
-		$text1 =~ s{(\p{InHiragana})[$e]($RxPeriod|$RxComma)?\z}{$1$f$2}g;
-		$text1 =~ s{(\p{InKatakana})[$e]($RxPeriod|$RxComma)?\z}{$1$f$2}g;
+		$text2 =~ s{\A[$e]\z}{$f};
+		$text2 =~ s{\A[$e](\p{InHiragana})}{$f$1};
+		$text2 =~ s{\A[$e](\p{InKatakana})}{$f$1};
+		$text2 =~ s{(\p{InHiragana})[$e](\p{InHiragana})}{$1$f$2}g;
+		$text2 =~ s{(\p{InHiragana})[$e](\p{InKatakana})}{$1$f$2}g;
+		$text2 =~ s{(\p{InKatakana})[$e](\p{InKatakana})}{$1$f$2}g;
+		$text2 =~ s{(\p{InKatakana})[$e](\p{InHiragana})}{$1$f$2}g;
+		$text2 =~ s{(\p{InHiragana})[$e]($RxPeriod|$RxComma)?\z}{$1$f$2}g;
+		$text2 =~ s{(\p{InKatakana})[$e]($RxPeriod|$RxComma)?\z}{$1$f$2}g;
 	}
 
-	return __PACKAGE__->_utf8to( $text1, $cname, $uflag );
+	return __PACKAGE__->_utf8to( $text2, $cname, $uflag );
 }
 
 sub _reckon
