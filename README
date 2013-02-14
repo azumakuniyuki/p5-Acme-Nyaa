@@ -5,7 +5,6 @@ INSTALLATION
 Acme::Nyaa installation is straightforward. If your CPAN shell is set up,
 you should just be able to do
 
-    # Not uploaded yet
     % cpan Acme::Nyaa
 
     % git clone https://github.com/azumakuniyuki/p5-Acme-Nyaa.git
@@ -20,9 +19,14 @@ Then install it:
     % make install
 
 USAGE
+
     my $sabatora = Acme::Nyaa->new;
     print $sabatora->cat( \'猫がかわいい。' ); # => 猫がかわいいニャー。
     print $sabatora->neko( \'神と和解せよ' );  # => ネコと和解せよ
+
+REPOSITORY
+
+    https://github.com/azumakuniyuki/p5-Acme-Nyaa.git
 
 DOCUMENTATION
 
