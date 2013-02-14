@@ -1,0 +1,104 @@
+#!/usr/bin/env perl
+# $Id: nyaa.PL,v 1.2 2011/02/11 10:20:26 ak Exp $
+
+=head1 NAME
+
+  nyaa - Translate Japanese texts to texts like which a cat talking.
+
+=head1 USAGE
+
+  nyaa /path/to/textfile
+  cat /path/to/textfile | nyaa
+
+=head1 OPTIONS
+
+  see `nyaa --help`
+
+=cut
+
+use strict;
+use warnings;
+use Acme::Nyaa;
+use Getopt::Long qw(:config posix_default no_ignore_case gnu_compat);
+
+BEGIN {
+	my $modulelist = [ 'Acme::Nyaa' ];
+	if( defined $ARGV[0] )
+	{
+		if( $ARGV[0] eq '--modules' )
+		{
+			print $_.qq(\n) for @$modulelist;
+			exit 0;
+		}
+	}
+}
+
+my $Version = '0.0.1';
+my $CatConf = { 'language' => 'ja' };
+my $Options = {
+	'nyaa' => ( 1 << 0 ),
+	'noun' => ( 1 << 1 ),
+	#'lang' => ( 1 << 2 ),
+	#'test' => ( 1 << 3 ),
+};
+my $Operations = parseoptions();
+
+if( $Operations )
+{
+	my $inputfiles = \@ARGV || [];
+	my $filehandle = undef;
+	my $nekonyaaaa = Acme::Nyaa->new( %$CatConf );
+
+	push @$inputfiles, \*STDIN unless scalar @$inputfiles;
+	foreach my $e ( @$inputfiles )
+	{
+		ref $e ? $filehandle = $e : open( $filehandle, '<', $e ) or die $e.': '.$!;
+		while( my $r = <$filehandle> )
+		{
+			$r = $nekonyaaaa->cat( \$r );
+			$r = $nekonyaaaa->neko( \$r ) if $Operations & $Options->{'noun'};
+			print $r;
+		}
+		close $filehandle unless ref $e;;
+	}
+}
+
+sub parseoptions
+{
+	my $o = 0;
+	my $opt_nyaa;
+	my $opt_noun;
+	#my $opt_lang;
+
+	Getopt::Long::Configure( qw/posix_default no_ignore_case gnu_compat/ );
+	Getopt::Long::GetOptions(
+		'n'		=> \$opt_noun,
+		'noun'		=> \$opt_noun,
+	#	'L=s'		=> \$opt_lang,
+	#	'lang=s'	=> \$opt_lang,
+		'help'		=> sub { help(); exit(0); },
+		'version'	=> sub { printf(STDERR "%s\n", $Version); exit(0); },
+	);
+
+	#if( $opt_lang )
+	#{
+	#	$o |= $Options->{'lang'};
+	#	$CatConf->{'language'} = $opt_lang;
+	#}
+
+	$o |= $Options->{'nyaa'};
+	$o |= $Options->{'noun'} if $opt_noun;
+
+	return $o;
+}
+
+sub help
+{
+	printf( STDERR "%s [OPTIONS] <FILE>\n", $0 );
+	printf( STDERR "cat <FILE> | %s [OPTIONS]\n", $0 );
+	printf( STDERR "\n" );
+	printf( STDERR "  -n, --noun             : replace a noun with 'ネコ'.\n" );
+	#printf( STDERR "  -L, --lang <lang-code> : Specify a language (only 'ja' for now).\n" );
+	printf( STDERR "\n" );
+}
+
