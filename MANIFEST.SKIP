@@ -20,3 +20,4 @@
 ^\.shipit$
 ^\.git/
 \.sw[po]$
+^tmp/
