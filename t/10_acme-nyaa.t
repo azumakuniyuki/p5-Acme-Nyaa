@@ -1,6 +1,6 @@
 use strict;
 use utf8;
-use Test::More 'tests' => 9;
+use Test::More 'tests' => 10;
 
 BEGIN { use_ok 'Acme::Nyaa' }
 
@@ -10,6 +10,7 @@ my $language = [ 'ja' ];
 can_ok( 'Acme::Nyaa', 'new' );
 can_ok( 'Acme::Nyaa', 'cat' );
 can_ok( 'Acme::Nyaa', 'neko' );
+can_ok( 'Acme::Nyaa', 'nyaa' );
 can_ok( 'Acme::Nyaa', 'loadmodule' );
 isa_ok( $kijitora, 'Acme::Nyaa' );
 is( $kijitora->{'language'}, 'ja' );

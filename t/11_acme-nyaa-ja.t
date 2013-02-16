@@ -1,6 +1,6 @@
 use strict;
 use utf8;
-use Test::More 'tests' => 1286;
+use Test::More 'tests' => 1290;
 use Encode;
 
 BEGIN { 
@@ -24,6 +24,10 @@ my $sabatora = Acme::Nyaa->new( 'language' => 'ja' );
 
 isa_ok( $sabatora, 'Acme::Nyaa' );
 is( $sabatora->{'language'}, 'ja', '->language() = ja' );
+
+can_ok( 'Acme::Nyaa::Ja', 'cat' );
+can_ok( 'Acme::Nyaa::Ja', 'neko' );
+can_ok( 'Acme::Nyaa::Ja', 'nyaa' );
 
 can_ok( 'Acme::Nyaa::Ja', '_reckon' );
 can_ok( 'Acme::Nyaa::Ja', '_toutf8' );
@@ -114,4 +118,7 @@ foreach my $l ( @$langlist )
 	}
 }
 
+$nekotext = q();
+$nekotext = $sabatora->nyaa();
+ok( length $nekotext, sprintf( "->nyaa() => %s", $nekotext ) );
 
