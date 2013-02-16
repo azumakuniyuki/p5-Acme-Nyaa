@@ -223,6 +223,16 @@ sub neko
 	return __PACKAGE__->_utf8to( $text2, $cname, $uflag );
 }
 
+sub nyaa
+{
+	my $class = shift;
+	my $sizec = 0;
+	my $nyaan = [];
+
+	push @$nyaan, @$KatakanaTails, @$HiraganaTails;
+	return $nyaan->[ int rand( scalar @$nyaan ) ];
+}
+
 sub _reckon
 {
 	my $class = shift;
@@ -302,6 +312,9 @@ Acme::Nyaa - Convert texts like which a cat is talking in Japanese
 
 =item neko
   neko() is a converter that replace a noun with 'ネコ'.
+
+=item nyaa
+  nyaa() returns string: 'ニャー'.
 
 =back
 

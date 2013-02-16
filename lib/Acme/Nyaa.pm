@@ -44,6 +44,16 @@ sub neko
 	return $referclass->neko( $text );
 }
 
+sub nyaa
+{
+	my $self = shift;
+	my $argv = { @_ };
+	my $lang = $argv->{'language'} || $self->{'language'};
+
+	my $referclass = $self->loadmodule( $lang );
+	return $referclass->nyaa;
+}
+
 sub loadmodule
 {
 	my $self = shift;
@@ -108,6 +118,9 @@ Acme::Nyaa - Convert texts like which a cat is talking in Japanese
 
 =item neko
   neko() is a converter that replace a noun with 'ネコ'.
+
+=item nyaa
+  nyaa() returns string: 'ニャー'.
 
 =back
 
