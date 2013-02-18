@@ -1,6 +1,6 @@
 use strict;
 use utf8;
-use Test::More 'tests' => 1290;
+use Test::More 'tests' => 1293;
 use Encode;
 
 BEGIN { 
@@ -20,18 +20,25 @@ my $nekotext = 't/cat-related-text.ja.txt';
 my $textlist = [];
 my $langlist = [ qw|af ar de el en es fa fi fr he hi id is la pt ru th tr zh| ];
 my $encoding = [ qw|euc-jp 7bit-jis shift-jis| ];
-my $sabatora = Acme::Nyaa->new( 'language' => 'ja' );
+my $cmethods = [ 'new', 'reckon', 'toutf8', 'utf8to' ];
+my $imethods = [ 'cat', 'neko', 'nyaa', 'language', 'findobject', 'objects', 'object' ];
+my $sabatora = undef;
 
+$sabatora = Acme::Nyaa->new( 'language' => 'ja' );
 isa_ok( $sabatora, 'Acme::Nyaa' );
-is( $sabatora->{'language'}, 'ja', '->language() = ja' );
+is( $sabatora->language, 'ja', '->language() = ja' );
 
-can_ok( 'Acme::Nyaa::Ja', 'cat' );
-can_ok( 'Acme::Nyaa::Ja', 'neko' );
-can_ok( 'Acme::Nyaa::Ja', 'nyaa' );
+$sabatora = Acme::Nyaa::Ja->new;
+isa_ok( $sabatora, 'Acme::Nyaa::Ja' );
+isa_ok( $sabatora->new, 'Acme::Nyaa::Ja' );
+isa_ok( $sabatora->object, 'Acme::Nyaa::Ja' );
+isa_ok( $sabatora->objects, 'Acme::Nyaa::Ja' );
+isa_ok( $sabatora->findobject, 'Acme::Nyaa::Ja' );
+is( $sabatora->language, 'ja', '->language() = ja' );
+is( $sabatora->reckon( '猫' ), 'utf8', '->reckon() = utf8' );
 
-can_ok( 'Acme::Nyaa::Ja', '_reckon' );
-can_ok( 'Acme::Nyaa::Ja', '_toutf8' );
-can_ok( 'Acme::Nyaa::Ja', '_utf8to' );
+can_ok( 'Acme::Nyaa::Ja', @$cmethods );
+can_ok( 'Acme::Nyaa::Ja', @$imethods );
 
 ok( -T $nekotext, sprintf( "%s is textfile", $nekotext ) );
 ok( -r $nekotext, sprintf( "%s is readable", $nekotext ) );
@@ -120,5 +127,5 @@ foreach my $l ( @$langlist )
 
 $nekotext = q();
 $nekotext = $sabatora->nyaa();
-ok( length $nekotext, sprintf( "->nyaa() => %s", $nekotext ) );
+ok( length $nekotext, sprintf( "->nyaa() => %s", e($nekotext) ) );
 
