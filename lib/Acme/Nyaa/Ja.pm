@@ -64,7 +64,12 @@ sub language
 	return $self->{'language'};
 }
 
-sub object { shift }
+sub object
+{
+	my $self = shift;
+	return __PACKAGE__->new unless ref $self;
+	return $self;
+}
 *objects = *object;
 *findobject = *object;
 
@@ -256,10 +261,12 @@ sub neko
 sub nyaa
 {
 	my $self = shift;
+	my $data = shift || q();
+	my $text = ref $data ? $$data : $data;
 	my $nyaa = [];
 
 	push @$nyaa, @$KatakanaTails, @$HiraganaTails;
-	return $nyaa->[ int rand( scalar @$nyaa ) ];
+	return $text.$nyaa->[ int rand( scalar @$nyaa ) ];
 }
 
 sub reckon
@@ -333,21 +340,21 @@ Language modules are available only Japanese (L<Acme::Nyaa::Ja>) for now.
 
 =head1 CLASS METHODS
 
-=head2 B<new>
+=head2 B<new()>
 
 new() is a constructor of Acme::Nyaa::Ja
 
 =head1 INSTANCE METHODS
 
-=head2 B<cat>
+=head2 B<cat( I<\$text> )>
 
 cat() is a converter that appends string C<ニャー> at the end of each sentence.
 
-=head2 B<neko>
+=head2 B<neko( I<\$text> )>
 
 neko() is a converter that replace a noun with C<ネコ>.
 
-=head2 B<nyaa>
+=head2 B<nyaa( [I<\$text>] )>
 
 nyaa() returns string: C<ニャー>.
 

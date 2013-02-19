@@ -23,7 +23,14 @@ sub new
 	my $klass = $nyaan->loadmodule( $argvs->{'language'} );
 	my $this1 = $nyaan->findobject( $klass, 1 );
 
+	$nyaan->{'subclass'} = $klass;
 	return $nyaan;
+}
+
+sub subclass
+{
+	my $self = shift;
+	return $self->{'subclass'};
 }
 
 sub language
@@ -31,7 +38,19 @@ sub language
 	my $self = shift;
 	my $lang = shift // $self->{'language'};
 
+	return $self->{'language'} if $lang eq $self->{'language'};
+	return $self->{'language'} unless $lang =~ m/\A[a-zA-Z]{2}\z/;
+
+	my $nekoobject = undef;
+	my $referclass = $self->loadmodule( $lang );
+	return $self->{'language'} unless length $referclass;
+	return $self->{'language'} if $referclass eq $self->subclass;
+
+	$nekoobject = $self->findobject( $referclass, 1 );
+	return $self->{'language'} unless ref $nekoobject eq $referclass;
+
 	$self->{'language'} = $lang;
+	$self->{'subclass'} = $referclass;
 	return $self->{'language'};
 }
 
@@ -46,44 +65,30 @@ sub cat
 {
 	my $self = shift;
 	my $text = shift // return q();
-	my $argv = { @_ };
-	my $lang = $argv->{'language'} || $self->{'language'};
+	my $neko = $self->findobject( $self->subclass, 1 );
 
-	my $referclass = $self->loadmodule( $lang );
-	my $nekoobject = undef;
-
-	return $text unless length $referclass;
-	$nekoobject = $self->findobject( $referclass, 1 );
-	return $nekoobject->cat( $text );
+	return $text unless ref $neko;
+	return $neko->cat( $text );
 }
 
 sub neko
 {
 	my $self = shift;
 	my $text = shift // return q();
-	my $argv = { @_ };
-	my $lang = $argv->{'language'} || $self->{'language'};
+	my $neko = $self->findobject( $self->subclass, 1 );
 
-	my $referclass = $self->loadmodule( $lang );
-	my $nekoobject = undef;
-
-	return $text unless length $referclass;
-	$nekoobject = $self->findobject( $referclass, 1 );
-	return $nekoobject->neko( $text );
+	return $text unless ref $neko;
+	return $neko->neko( $text );
 }
 
 sub nyaa
 {
 	my $self = shift;
-	my $argv = { @_ };
-	my $lang = $argv->{'language'} || $self->{'language'};
+	my $text = shift // q();
+	my $neko = $self->findobject( $self->subclass, 1 );
 
-	my $referclass = $self->loadmodule( $lang );
-	my $nekoobject = undef;
-	return q() unless length $referclass;
-
-	$nekoobject = $self->findobject( $referclass, 1 );
-	return $nekoobject->nyaa;
+	return $text unless ref $neko;
+	return $neko->nyaa( $text );
 }
 
 sub loadmodule
@@ -98,7 +103,7 @@ sub loadmodule
 	return q() unless length $lang;
 	return $referclass if( grep { lc $lang eq $_ } @$list );
 
-	eval { 
+	eval {
 		Module::Load::load $referclass; 
 		push @$list, lc $lang;
 	};
@@ -162,21 +167,21 @@ Nyaa is C<ニャー>, Cats living in Japan meows C<nyaa>.
 
 =head1 CLASS METHODS
 
-=head2 B<new>
+=head2 B<new( [I<%argv>] )>
 
 new() is a constructor of Acme::Nyaa
 
 =head1 INSTANCE METHODS
 
-=head2 B<cat>
+=head2 B<cat( I<\$text> )>
 
 cat() is a converter that appends string C<ニャー> at the end of each sentence.
 
-=head2 B<neko>
+=head2 B<neko( I<\$text> )>
 
 neko() is a converter that replace a noun with C<ネコ>.
 
-=head2 B<nyaa>
+=head2 B<nyaa( [I<\$text>] )>
 
 nyaa() returns string: C<ニャー>.
 
