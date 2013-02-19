@@ -3,16 +3,20 @@
 
 =head1 NAME
 
-  nyaa - Translate Japanese texts to texts like which a cat talking.
+nyaa - Translate Japanese texts to texts like which a cat talking.
+
+=head1 DESCRIPTION
+
+Implementation as a sample code using Acme::Nyaa module
 
 =head1 USAGE
 
-  nyaa /path/to/textfile
-  cat /path/to/textfile | nyaa
+	% nyaa /path/to/textfile
+	% cat /path/to/textfile | nyaa
 
 =head1 OPTIONS
 
-  see `nyaa --help`
+see `nyaa --help`
 
 =cut
 
