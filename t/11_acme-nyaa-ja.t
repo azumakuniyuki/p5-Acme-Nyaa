@@ -1,6 +1,6 @@
 use strict;
 use utf8;
-use Test::More 'tests' => 1293;
+use Test::More 'tests' => 1296;
 use Encode;
 
 BEGIN { 
@@ -125,7 +125,9 @@ foreach my $l ( @$langlist )
 	}
 }
 
-$nekotext = q();
-$nekotext = $sabatora->nyaa();
-ok( length $nekotext, sprintf( "->nyaa() => %s", e($nekotext) ) );
+foreach my $e ( '', '猫', 'ねこ', 'ネコ' )
+{
+	$nekotext = $sabatora->nyaa($e);
+	ok( length $nekotext, sprintf( "->nyaa(%s) => %s", e($e), e($nekotext) ) );
+}
 

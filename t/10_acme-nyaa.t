@@ -1,13 +1,13 @@
 use strict;
 use utf8;
-use Test::More 'tests' => 15;
+use Test::More 'tests' => 18;
 
 BEGIN { use_ok 'Acme::Nyaa' }
 
 my $kijitora = Acme::Nyaa->new;
 my $language = [ 'ja' ];
 my $cmethods = [ 'new' ];
-my $imethods = [ 'cat', 'neko', 'nyaa', 'loadmodule', 'findobject', 'objects' ];
+my $imethods = [ 'cat', 'neko', 'nyaa', 'loadmodule', 'findobject', 'objects', 'subclass' ];
 
 can_ok( 'Acme::Nyaa', @$cmethods );
 can_ok( 'Acme::Nyaa', @$imethods );
@@ -15,6 +15,8 @@ isa_ok( $kijitora, 'Acme::Nyaa' );
 isa_ok( $kijitora->objects, 'ARRAY' );
 isa_ok( $kijitora->new, 'Acme::Nyaa' );
 is( $kijitora->language, 'ja', '->language() = ja' );
+is( $kijitora->language('xx'), 'ja', '->language(xx) = ja' );
+is( $kijitora->language('cat'), 'ja', '->language(cat) = ja' );
 
 foreach my $e ( @$language )
 {
@@ -28,6 +30,8 @@ foreach my $e ( @$language )
 	isa_ok( $o->new, 'Acme::Nyaa' );
 	isa_ok( $o->objects, 'ARRAY', '->objects() = ARRAY' );
 	is( $o->language, $e, sprintf( "->language() = %s", $e ) );
+	is( $o->subclass, $c, sprintf( "->subclass() = %s", $c ) );
+
 
 	$p = $o->findobject( $c, 0 );
 	isa_ok( $p, $c, sprintf( "->findobject(0) = %s", $c ));
