@@ -8,6 +8,7 @@ you should just be able to do
     % cpan Acme::Nyaa
 
     % git clone https://github.com/azumakuniyuki/p5-Acme-Nyaa.git
+    % cpanm Module::Install
 
 Download it, unpack it, then build it as per the usual:
 
@@ -16,7 +17,7 @@ Download it, unpack it, then build it as per the usual:
 
 Then install it:
 
-    % make install
+    % sudo make install
 
 USAGE
 
