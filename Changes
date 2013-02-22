@@ -1,5 +1,9 @@
 Revision history for Perl extension Acme::Nyaa
 
+0.0.4	Fri, 22 Feb 2013 20:24:56 +0900 (JST)
+	- 22 Feb, Happy Cat Day !
+	- Code and test refactoring.
+
 0.0.3	Thu, 14 Feb 2013 20:24:45 +0900 (JST)
 	- First Release on CPAN.
 	- Register bin/nyaa as a sample script.
