@@ -1,5 +1,10 @@
 Revision history for Perl extension Acme::Nyaa
 
+0.0.5	Tue, 26 Feb 2013 12:22:22 +0900 (JST)
+	- use 5.10.1 (parent.pm has been appeared from 5.10.1) at Acme::Nyaa::Ja.
+	  See http://www.cpantesters.org/cpan/report/65daccb2-7d93-11e2-a7ac-bc45f1f528ea
+	  Thanks to Chris Williams (BINGOS)
+
 0.0.4	Fri, 22 Feb 2013 20:24:56 +0900 (JST)
 	- 22 Feb, Happy Cat Day !
 	- Code and test refactoring.
