@@ -2,10 +2,10 @@ package Acme::Nyaa;
 use strict;
 use warnings;
 use utf8;
-use 5.010000;
+use 5.010001;
 use Module::Load;
 
-use version; our $VERSION = qv('0.0.4');
+use version; our $VERSION = qv('0.0.5');
 my $Default = 'ja';
 
 sub new
