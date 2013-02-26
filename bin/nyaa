@@ -24,6 +24,7 @@ use strict;
 use warnings;
 use Acme::Nyaa;
 use Getopt::Long qw(:config posix_default no_ignore_case gnu_compat);
+use File::Basename qw(basename);
 
 BEGIN {
 	my $modulelist = [ 'Acme::Nyaa' ];
@@ -37,7 +38,7 @@ BEGIN {
 	}
 }
 
-my $Version = '0.0.1';
+my $Version = $Acme::Nyaa::VERSION;
 my $CatConf = { 'language' => 'ja' };
 my $Options = {
 	'nyaa' => ( 1 << 0 ),
@@ -101,7 +102,9 @@ sub help
 	printf( STDERR "%s [OPTIONS] <FILE>\n", $0 );
 	printf( STDERR "cat <FILE> | %s [OPTIONS]\n", $0 );
 	printf( STDERR "\n" );
-	printf( STDERR "  -n, --noun             : replace a noun with 'ネコ'.\n" );
+	printf( STDERR "  -n, --noun             : Replace some nouns with 'ネコ'.\n" );
+	printf( STDERR "   --help                : This screen'.\n" );
+	printf( STDERR "   --version             : Print %s version'.\n", basename $0 );
 	#printf( STDERR "  -L, --lang <lang-code> : Specify a language (only 'ja' for now).\n" );
 	printf( STDERR "\n" );
 }
