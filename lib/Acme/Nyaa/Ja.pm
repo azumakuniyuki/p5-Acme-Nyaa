@@ -5,7 +5,6 @@ use warnings;
 use utf8;
 use Encode;
 use Encode::Guess qw(shift-jis euc-jp 7bit-jis);;
-use IO::File;
 
 my $RxComma = qr/[、(?:, )]/;
 my $RxPeriod = qr/[。]/;
