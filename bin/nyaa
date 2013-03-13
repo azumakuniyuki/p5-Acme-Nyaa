@@ -22,7 +22,10 @@ see `nyaa --help`
 
 use strict;
 use warnings;
+use utf8;
 use Acme::Nyaa;
+use IO::File;
+use Encode;
 use Getopt::Long qw(:config posix_default no_ignore_case gnu_compat);
 use File::Basename qw(basename);
 
@@ -46,25 +49,22 @@ my $Options = {
 	#'lang' => ( 1 << 2 ),
 	#'test' => ( 1 << 3 ),
 };
-my $Operations = parseoptions();
+my $RunMode = parseoptions();
 
-if( $Operations )
+if( $RunMode )
 {
 	my $inputfiles = \@ARGV || [];
 	my $filehandle = undef;
 	my $nekonyaaaa = Acme::Nyaa->new( %$CatConf );
+	my $nekobuffer = q();
+	my $nounoption = $RunMode & $Options->{'noun'};
 
 	push @$inputfiles, \*STDIN unless scalar @$inputfiles;
 	foreach my $e ( @$inputfiles )
 	{
-		ref $e ? $filehandle = $e : open( $filehandle, '<', $e ) or die $e.': '.$!;
-		while( my $r = <$filehandle> )
-		{
-			$r = $nekonyaaaa->cat( \$r );
-			$r = $nekonyaaaa->neko( \$r ) if $Operations & $Options->{'noun'};
-			print $r;
-		}
-		close $filehandle unless ref $e;;
+		$filehandle = ref $e ? $e : IO::File->new( $e, 'r' ) or die 'Cannot open '.$e;
+		$nekobuffer = [ <$filehandle> ];
+		print $nekonyaaaa->straycat( $nekobuffer, $nounoption );
 	}
 }
 
