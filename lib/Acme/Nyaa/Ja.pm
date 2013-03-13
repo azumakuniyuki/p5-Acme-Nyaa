@@ -5,8 +5,9 @@ use warnings;
 use utf8;
 use Encode;
 use Encode::Guess qw(shift-jis euc-jp 7bit-jis);;
+use IO::File;
 
-my $RxComma = qr/[、(?:,\s+)]/;
+my $RxComma = qr/[、(?:, )]/;
 my $RxPeriod = qr/[。]/;
 my $RxEndOfList = qr#[）)-=+|}＞>/:;"'`\]]#;
 my $RxConversation = qr/[「『].+[」』]/;
@@ -206,6 +207,7 @@ sub cat
 			}
 		}
 
+		$e =~ s/[!]$RxPeriod/! /g;
 		$e .= qq(\n) if $haschomped;
 
 	} # End of foreach(@$writingset)
@@ -269,6 +271,55 @@ sub nyaa
 	return $text.$nyaa->[ int rand( scalar @$nyaa ) ];
 }
 
+sub straycat
+{
+	my $self = shift;
+	my $data = shift // return q();
+	my $noun = shift // 0;
+
+	my $reference1 = ref $data;
+	my $inputlines = [];
+	my $outputtext = q();
+	my $nekobuffer = q();
+	my $leftbuffer = q();
+	my $buffersize = 8192;
+
+	return q() unless $reference1 =~ m/(?:ARRAY|SCALAR)/;
+	push @$inputlines, $reference1 eq 'ARRAY' ? @$data : $$data;
+	return q() unless scalar @$inputlines;
+
+	foreach my $r ( @$inputlines )
+	{
+		$nekobuffer .= Encode::decode_utf8 $r unless utf8::is_utf8 $r;
+		if( length $nekobuffer < $buffersize )
+		{
+			if( $nekobuffer =~ m/(.+$RxPeriod)(.*)/msx )
+			{
+				$nekobuffer = $1;
+				$leftbuffer = $2;
+			}
+			else
+			{
+				next;
+			}
+		}
+
+		$nekobuffer = $self->cat( \$nekobuffer );
+
+		if( $noun )
+		{
+			$nekobuffer = $self->neko( \$nekobuffer );
+			$leftbuffer = $self->neko( \$leftbuffer );
+		}
+
+		$outputtext .= Encode::encode_utf8 $nekobuffer if utf8::is_utf8 $nekobuffer;
+		$nekobuffer  = $leftbuffer;
+		$leftbuffer  = q();
+	}
+
+	return $outputtext;
+}
+
 sub reckon
 {
 	my $class = shift;
@@ -294,7 +345,7 @@ sub toutf8
 
 	Encode::from_to( $text0, $guess, 'utf8' ) if $guess ne 'utf8';
 	$uflag = utf8::is_utf8($text0);
-	utf8::decode $text0 unless $uflag;
+	$text0 = Encode::decode_utf8 $text0 unless $uflag;
 	return $text0;
 }
 
@@ -305,7 +356,7 @@ sub utf8to
 	my $guess = shift || return $text0;
 	my $uflag = shift // 0;
 
-	utf8::encode $text0 if( $uflag == 0 && utf8::is_utf8 $text0 );
+	$text0 = Encode::encode_utf8 $text0 if( $uflag == 0 && utf8::is_utf8 $text0 );
 	Encode::from_to( $text0, 'utf8', $guess ) if $guess ne 'utf8';
 	return $text0;
 }
@@ -344,19 +395,52 @@ Language modules are available only Japanese (L<Acme::Nyaa::Ja>) for now.
 
 new() is a constructor of Acme::Nyaa::Ja
 
+	my $kijitora = Acme::Nyaa::Ja->new();
+	my $sabatora = Acme::Nyaa->new( 'language' => 'ja' );
+
 =head1 INSTANCE METHODS
 
 =head2 B<cat( I<\$text> )>
 
 cat() is a converter that appends string C<ニャー> at the end of each sentence.
 
+	my $kijitora = Acme::Nyaa::Ja->new;
+	my $nekotext = '猫がかわいい。';
+	print $kijitora->cat( \$nekotext );
+	# 猫がかわいいニャーー!!
+
 =head2 B<neko( I<\$text> )>
 
 neko() is a converter that replace a noun with C<ネコ>.
 
+	my $kijitora = Acme::Nyaa::Ja->new;
+	my $nekotext = '人の道も行いも神は見ている';
+	print $kijitora->neko( \$nekotext );
+	# 人の道も行いもネコは見ている
+
 =head2 B<nyaa( [I<\$text>] )>
 
 nyaa() returns string: C<ニャー>.
+
+	my $kijitora = Acme::Nyaa->new;
+	print $kijitora->nyaa();	# ニャー
+	print $kijitora->nyaa('京都');	# 京都にゃー
+
+=head2 B<straycat( I<\@array-ref> | I<\$scalar-ref> [,1] )>
+
+straycat() converts multi-lined sentences. If 2nd argument is given then
+this method also replace each noun with C<ネコ>.
+
+	my $nekoobject = Acme::Nyaa::Ja->new;
+	my $filehandle = IO::File->new( 't/a-part-of-i-am-a-cat.ja.txt', 'r' );
+	my @nekobuffer = <$filehandle>;
+	print $nekoobject->straycat( \@nekobuffer );
+
+	# 吾輩は猫であるニャ。名前はまだ無いニャーー! 
+	# どこで生まれたか頓と見當がつかぬニャーん。何ても暗薄いじめじめした所でニャーニャー泣いて
+	# 居た事丈は記憶して居るニャーん。吾輩はこゝで始めて人間といふものを見たニャーん。然もあとで聞くと
+	# それは書生といふ人間で一番獰惡な種族であつたさうだニャーーー!! 此書生といふのは時々我々を捕
+	# へて煮て食ふといふ話であるニャ〜。
 
 =head1 AUTHOR
 

@@ -5,7 +5,7 @@ use utf8;
 use 5.010001;
 use Module::Load;
 
-use version; our $VERSION = qv('0.0.5');
+use version; our $VERSION = qv('0.0.6');
 my $Default = 'ja';
 
 sub new
@@ -91,6 +91,16 @@ sub nyaa
 	return $neko->nyaa( $text );
 }
 
+sub straycat
+{
+	my $self = shift;
+	my $text = shift // return q();
+	my $neko = $self->findobject( $self->subclass, 1 );
+
+	return $text unless ref $neko;
+	return $neko->straycat( $text );
+}
+
 sub loadmodule
 {
 	my $self = shift;
@@ -171,19 +181,51 @@ Nyaa is C<ニャー>, Cats living in Japan meows C<nyaa>.
 
 new() is a constructor of Acme::Nyaa
 
+	my $kijitora = Acme::Nyaa->new();
+
 =head1 INSTANCE METHODS
 
 =head2 B<cat( I<\$text> )>
 
 cat() is a converter that appends string C<ニャー> at the end of each sentence.
 
+	my $kijitora = Acme::Nyaa->new;
+	my $nekotext = '猫がかわいい。';
+	print $kijitora->cat( \$nekotext );
+	# 猫がかわいいニャー。
+
 =head2 B<neko( I<\$text> )>
 
 neko() is a converter that replace a noun with C<ネコ>.
 
+	my $kijitora = Acme::Nyaa->new;
+	my $nekotext = '神のさばきは突然にくる';
+	print $kijitora->neko( \$nekotext );
+	# ネコのさばきは突然にくる
+
 =head2 B<nyaa( [I<\$text>] )>
 
 nyaa() returns string: C<ニャー>.
+
+	my $kijitora = Acme::Nyaa->new;
+	print $kijitora->nyaa();	# ニャー
+	print $kijitora->nyaa('京都');	# 京都ニャー
+
+=head2 B<straycat( I<\@array-ref> | I<\$scalar-ref> [,1] )>
+
+straycat() converts multi-lined sentences. If 2nd argument is given then
+this method also replace each noun with C<ネコ>.
+
+	my $nekoobject = Acme::Nyaa->new;
+	my $filehandle = IO::File->new( 't/a-part-of-i-am-a-cat.ja.txt', 'r' );
+	my @nekobuffer = <$filehandle>;
+	print $nekoobject->straycat( \@nekobuffer );
+
+	# 吾輩は猫であるニャん。名前はまだ無いニャー。
+	# どこで生まれたか頓と見當がつかぬニャーー! 何ても暗薄いじめじめした所でニャーニャー泣いて
+	# 居た事丈は記憶して居るニャーん。吾輩はこゝで始めて人間といふものを見たニャーーーー! 然もあとで聞くと
+	# それは書生といふ人間で一番獰惡な種族であつたさうだニャん。此書生といふのは時々我々を捕
+	# へて煮て食ふといふ話であるニャー!
 
 =head1 REPOSITORY
 
