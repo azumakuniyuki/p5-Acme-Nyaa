@@ -1,6 +1,6 @@
 use strict;
 use utf8;
-use Test::More 'tests' => 1296;
+use Test::More 'tests' => 1301;
 use Encode;
 
 BEGIN { 
@@ -21,7 +21,10 @@ my $textlist = [];
 my $langlist = [ qw|af ar de el en es fa fi fr he hi id is la pt ru th tr zh| ];
 my $encoding = [ qw|euc-jp 7bit-jis shift-jis| ];
 my $cmethods = [ 'new', 'reckon', 'toutf8', 'utf8to' ];
-my $imethods = [ 'cat', 'neko', 'nyaa', 'language', 'findobject', 'objects', 'object' ];
+my $imethods = [ 
+	'cat', 'neko', 'nyaa', 'straycat',
+	'language', 'findobject', 'objects', 'object',
+];
 my $sabatora = undef;
 
 $sabatora = Acme::Nyaa->new( 'language' => 'ja' );
@@ -130,4 +133,21 @@ foreach my $e ( '', '猫', 'ねこ', 'ネコ' )
 	$nekotext = $sabatora->nyaa($e);
 	ok( length $nekotext, sprintf( "->nyaa(%s) => %s", e($e), e($nekotext) ) );
 }
+
+$nekotext = 't/a-part-of-i-am-a-cat.ja.txt';
+ok( -T $nekotext, sprintf( "%s is textfile", $nekotext ) );
+ok( -r $nekotext, sprintf( "%s is readable", $nekotext ) );
+
+open( my $fh, '<', $nekotext ) || die 'cannot open '.$nekotext;
+$textlist = [ <$fh> ];
+ok( scalar @$textlist, 
+	sprintf( "%s have %d lines", $nekotext, scalar @$textlist ) );
+close $fh;
+
+my $text0 = join( '', @$textlist );
+my $text1 = $sabatora->straycat( $textlist );
+my $text2 = $sabatora->straycat( \$text0 );
+
+ok( length( $text1 ) > length( $text0 ) );
+ok( length( $text2 ) > length( $text0 ) );
 

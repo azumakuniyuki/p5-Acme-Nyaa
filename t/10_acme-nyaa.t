@@ -7,7 +7,10 @@ BEGIN { use_ok 'Acme::Nyaa' }
 my $kijitora = Acme::Nyaa->new;
 my $language = [ 'ja' ];
 my $cmethods = [ 'new' ];
-my $imethods = [ 'cat', 'neko', 'nyaa', 'loadmodule', 'findobject', 'objects', 'subclass' ];
+my $imethods = [ 
+	'cat', 'neko', 'nyaa', 'straycat',
+	'loadmodule', 'findobject', 'objects', 'subclass',
+];
 
 can_ok( 'Acme::Nyaa', @$cmethods );
 can_ok( 'Acme::Nyaa', @$imethods );
