@@ -138,7 +138,7 @@ $nekotext = 't/a-part-of-i-am-a-cat.ja.txt';
 ok( -T $nekotext, sprintf( "%s is textfile", $nekotext ) );
 ok( -r $nekotext, sprintf( "%s is readable", $nekotext ) );
 
-open( my $fh, '<', $nekotext ) || die 'cannot open '.$nekotext;
+open( $fh, '<', $nekotext ) || die 'cannot open '.$nekotext;
 $textlist = [ <$fh> ];
 ok( scalar @$textlist, 
 	sprintf( "%s have %d lines", $nekotext, scalar @$textlist ) );
