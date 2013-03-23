@@ -1,5 +1,9 @@
 Revision history for Perl extension Acme::Nyaa
 
+0.0.6	Sun, 24 Mar 2013 06:12:02 +0900 (JST)
+	- Implement new instance method ``straycat''.
+	- Improved sample script bin/nyaa .
+
 0.0.5	Tue, 26 Feb 2013 12:22:22 +0900 (JST)
 	- use 5.10.1 (parent.pm has been appeared from 5.10.1) at Acme::Nyaa::Ja.
 	  See http://www.cpantesters.org/cpan/report/65daccb2-7d93-11e2-a7ac-bc45f1f528ea
