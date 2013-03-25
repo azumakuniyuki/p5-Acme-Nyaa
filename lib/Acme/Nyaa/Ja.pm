@@ -316,6 +316,10 @@ sub straycat
 		$leftbuffer  = q();
 	}
 
+	if( length $nekobuffer )
+	{
+		$outputtext .= Encode::encode_utf8 $nekobuffer if utf8::is_utf8 $nekobuffer;
+	}
 	return $outputtext;
 }
 
