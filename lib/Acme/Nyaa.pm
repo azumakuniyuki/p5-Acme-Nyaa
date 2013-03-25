@@ -5,7 +5,7 @@ use utf8;
 use 5.010001;
 use Module::Load;
 
-use version; our $VERSION = qv('0.0.6');
+use version; our $VERSION = qv('0.0.7');
 my $Default = 'ja';
 
 sub new
