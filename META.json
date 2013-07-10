@@ -4,7 +4,7 @@
       "azumakuniyuki <perl.org [at] azumakuniyuki.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v0.5.3, CPAN::Meta::Converter version 2.112150",
+   "generated_by" : "Minilla/v0.5.3, CPAN::Meta::Converter version 2.131560",
    "license" : [
       "perl_5"
    ],
@@ -28,19 +28,19 @@
       "build" : {
          "requires" : {
             "ExtUtils::MakeMaker" : "6.59",
-            "Test::More" : 0
+            "Test::More" : "0"
          }
       },
       "configure" : {
          "requires" : {
-            "CPAN::Meta" : 0,
-            "CPAN::Meta::Prereqs" : 0,
+            "CPAN::Meta" : "0",
+            "CPAN::Meta::Prereqs" : "0",
             "Module::Build" : "0.38"
          }
       },
       "develop" : {
          "requires" : {
-            "Test::CPAN::Meta" : 0,
+            "Test::CPAN::Meta" : "0",
             "Test::MinimumVersion" : "0.10108",
             "Test::Pod" : "1.41",
             "Test::Spellunker" : "v0.2.7"
@@ -48,14 +48,14 @@
       },
       "runtime" : {
          "requires" : {
-            "Module::Load" : 0,
+            "Module::Load" : "0",
             "perl" : "5.010001"
          }
       }
    },
    "release_status" : "unstable",
-   "version" : "0.0.7",
+   "version" : "0.0.8",
    "x_contributors" : [
-      "azumakuniyuki <azumakuniyuki@gmail.com>"
+      "azumakuniyuki <perl.org@azumakuniyuki>"
    ]
 }
