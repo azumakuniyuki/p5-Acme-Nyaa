@@ -1,5 +1,7 @@
 Revision history for Perl extension Acme::Nyaa
 
+{{$NEXT}}
+
 0.0.7	Mon, 25 Mar 2013 12:22:59 +0900 (JST)
 	- Fixed an issue that Acme-Nyaa-0.0.6 fails for lack of t/a-part-of-i-am-a-cat.ja.txt.
 	  Thanks to CPAN Testers.
