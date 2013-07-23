@@ -28,7 +28,7 @@
       "build" : {
          "requires" : {
             "ExtUtils::MakeMaker" : "6.59",
-            "Test::More" : "0"
+            "Test::More" : "0.98"
          }
       },
       "configure" : {
@@ -48,14 +48,15 @@
       },
       "runtime" : {
          "requires" : {
-            "Module::Load" : "0",
+            "Encode" : "2.42",
+            "Module::Load" : "0.18",
             "perl" : "5.010001"
          }
       }
    },
    "release_status" : "unstable",
-   "version" : "0.0.8",
+   "version" : "0.0.9",
    "x_contributors" : [
-      "azumakuniyuki <perl.org@azumakuniyuki>"
+      "azumakuniyuki <perl.org@azumakuniyuki.org>"
    ]
 }
