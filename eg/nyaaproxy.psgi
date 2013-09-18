@@ -28,7 +28,7 @@ builder {
         my $cth = [ 'Content-Type' => 'text/plain' ];
         my $tmp = undef;
 
-        if( length $url ) {
+        if( length $url > 1 ) {
 
             if( $url =~ m|\A/(https?://)(.+?)/(.*)\z| ) {
                 $servername = $1.$2;
@@ -66,11 +66,10 @@ builder {
             }
 
         } else {
-            $err = [ 'Request URL is empty' ];
             return [ 
-                400, 
+                404, 
                 [ 'Content-Type' => 'text/plain' ],
-                [ 'Request URL is empty' ],
+                [ 'Usage: http://127.0.0.1:2222/http://ja.wikipedia.org/柴犬' ]
             ];
         }
     };
