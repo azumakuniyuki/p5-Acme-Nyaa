@@ -1,6 +1,5 @@
 #!/usr/bin/env perl
 # $Id: nyaa.PL,v 1.2 2011/02/11 10:20:26 ak Exp $
-
 use strict;
 use warnings;
 use utf8;
