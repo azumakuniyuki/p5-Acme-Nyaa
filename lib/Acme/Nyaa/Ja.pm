@@ -423,7 +423,7 @@ neko() is a converter that replace a noun with C<ネコ>.
 nyaa() returns string: C<ニャー>.
 
     my $kijitora = Acme::Nyaa->new;
-    print $kijitora->nyaa();    # ニャー
+    print $kijitora->nyaa();        # ニャー
     print $kijitora->nyaa('京都');  # 京都にゃー
 
 =head2 B<straycat( I<\@array-ref> | I<\$scalar-ref> [,1] )>
