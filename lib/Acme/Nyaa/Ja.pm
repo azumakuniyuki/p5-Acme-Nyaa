@@ -24,7 +24,7 @@ my $FightingCats = [
     '「マーーーオ!!」',
     '「マーーーーオ!!!」',
 ];
-my $Copulae = [ 'だ', 'です', 'である', 'どす', 'かもしれない', 'らしい', 'ようだ' ];
+my $Copulae = [ 'だ', 'です', 'である', 'どす', 'かもしれない', 'らしい', 'ようです' ];
 my $HiraganaTails = [ 
     'にゃ', 'にゃー', 'にゃ〜', 'にゃーーーー!', 'にゃん', 'にゃーん', 'にゃ〜ん', 
     'にゃー!', 'にゃーーー!!', 'にゃーー!',
@@ -272,7 +272,7 @@ sub straycat {
     my $outputtext = q();
     my $nekobuffer = q();
     my $leftbuffer = q();
-    my $buffersize = 140;
+    my $buffersize = 144;
 
     return q() unless $reference1 =~ m/(?:ARRAY|SCALAR)/;
     push @$inputlines, $reference1 eq 'ARRAY' ? @$data : $$data;
