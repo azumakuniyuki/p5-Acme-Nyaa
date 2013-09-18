@@ -47,7 +47,7 @@ my $DoNotBecomeCat = [
 ];
 
 sub new {
-
+    # Constructor
     my $class = shift;
     my $argvs = { @_ };
 
@@ -57,7 +57,7 @@ sub new {
 }
 
 sub language {
-
+    # Set language to use
     my $self = shift;
 
     $self->{'language'} ||= 'ja';
@@ -65,7 +65,7 @@ sub language {
 }
 
 sub object {
-
+    # Wrapper method for new()
     my $self = shift;
     return __PACKAGE__->new unless ref $self;
     return $self;
@@ -74,7 +74,6 @@ sub object {
 *findobject = *object;
 
 sub cat {
-
     my $self = shift;
     my $text = shift;
 
@@ -210,7 +209,6 @@ sub cat {
 }
 
 sub neko {
-
     my $self = shift;
     my $text = shift;
 
@@ -255,7 +253,6 @@ sub neko {
 }
 
 sub nyaa {
-
     my $self = shift;
     my $data = shift || q();
     my $text = ref $data ? $$data : $data;
@@ -275,15 +272,21 @@ sub straycat {
     my $outputtext = q();
     my $nekobuffer = q();
     my $leftbuffer = q();
-    my $buffersize = 8192;
+    my $buffersize = 140;
 
     return q() unless $reference1 =~ m/(?:ARRAY|SCALAR)/;
     push @$inputlines, $reference1 eq 'ARRAY' ? @$data : $$data;
     return q() unless scalar @$inputlines;
 
     foreach my $r ( @$inputlines ) {
+        # To be a cat
+        if( $r =~ m|[^\x20-\x7e]+| ) {
+            # Encode if any multibyte character exsits
+            $nekobuffer .= Encode::decode_utf8 $r unless utf8::is_utf8 $r;
 
-        $nekobuffer .= Encode::decode_utf8 $r unless utf8::is_utf8 $r;
+        } else {
+            $nekobuffer .= $r;
+        }
 
         if( length $nekobuffer < $buffersize ) {
 
@@ -297,12 +300,15 @@ sub straycat {
             }
         }
 
-        $nekobuffer = $self->cat( \$nekobuffer );
+        if( $nekobuffer =~ m|[^\x20-\x7e]+| ) {
+            # Convert if any multibyte character exsits
+            $nekobuffer = $self->cat( \$nekobuffer );
+        }
 
         if( $noun ) {
-
-            $nekobuffer = $self->neko( \$nekobuffer );
-            $leftbuffer = $self->neko( \$leftbuffer );
+            # Convert noun
+            $nekobuffer = $self->neko( \$nekobuffer ) if $nekobuffer =~ m|[^\x20-\x7e]+|;
+            $leftbuffer = $self->neko( \$leftbuffer ) if $leftbuffer =~ m|[^\x20-\x7e]+|;
         }
 
         $outputtext .= Encode::encode_utf8 $nekobuffer if utf8::is_utf8 $nekobuffer;
@@ -318,7 +324,6 @@ sub straycat {
 }
 
 sub reckon {
-
     my $class = shift;
     my $text0 = shift;
 
@@ -332,7 +337,6 @@ sub reckon {
 }
 
 sub toutf8 {
-
     my $class = shift;
     my $text0 = shift // return q();
     my $guess = shift || __PACKAGE__->reckon( \$text0 );
@@ -347,7 +351,6 @@ sub toutf8 {
 }
 
 sub utf8to {
-
     my $class = shift;
     my $text0 = shift // return q();
     my $guess = shift || return $text0;

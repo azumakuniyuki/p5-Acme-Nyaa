@@ -9,7 +9,7 @@ use version; our $VERSION = qv('0.0.9');
 my $Default = 'ja';
 
 sub new {
-
+    # Constructor of Acme::Nyaa
     my $class = shift;
     my $argvs = { @_ };
 
@@ -28,7 +28,6 @@ sub new {
 }
 
 sub subclass {
-
     my $self = shift;
     return $self->{'subclass'};
 }
@@ -54,14 +53,12 @@ sub language {
 }
 
 sub objects {
-
     my $self = shift;
     $self->{'objects'} ||= [];
     return $self->{'objects'};
 }
 
 sub cat {
-
     my $self = shift;
     my $text = shift // return q();
     my $neko = $self->findobject( $self->subclass, 1 );
@@ -71,7 +68,6 @@ sub cat {
 }
 
 sub neko {
-
     my $self = shift;
     my $text = shift // return q();
     my $neko = $self->findobject( $self->subclass, 1 );
@@ -81,7 +77,6 @@ sub neko {
 }
 
 sub nyaa {
-
     my $self = shift;
     my $text = shift // q();
     my $neko = $self->findobject( $self->subclass, 1 );
@@ -91,7 +86,6 @@ sub nyaa {
 }
 
 sub straycat {
-
     my $self = shift;
     my $text = shift // return q();
     my $neko = $self->findobject( $self->subclass, 1 );
@@ -101,7 +95,6 @@ sub straycat {
 }
 
 sub loadmodule {
-
     my $self = shift;
     my $lang = shift;
     my $list = $self->{'loaded-languages'};
@@ -126,7 +119,6 @@ sub loadmodule {
 }
 
 sub findobject {
-
     my $self = shift;
     my $name = shift;
     my $new1 = shift || 0;
