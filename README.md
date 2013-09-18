@@ -53,7 +53,7 @@ neko() is a converter that replace a noun with `ネコ`.
 nyaa() returns string: `ニャー`.
 
     my $kijitora = Acme::Nyaa->new;
-    print $kijitora->nyaa();    # ニャー
+    print $kijitora->nyaa();        # ニャー
     print $kijitora->nyaa('京都');  # 京都ニャー
 
 ## __straycat( _\\@array-ref_ | _\\$scalar-ref_ \[,1\] )__
@@ -71,6 +71,18 @@ this method also replace each noun with `ネコ`.
     # 居た事丈は記憶して居るニャーん。吾輩はこゝで始めて人間といふものを見たニャーーーー! 然もあとで聞くと
     # それは書生といふ人間で一番獰惡な種族であつたさうだニャん。此書生といふのは時々我々を捕
     # へて煮て食ふといふ話であるニャー!
+
+
+
+# SAMPLE APPLICATION
+
+## nyaaproxy
+
+nyaaproxy is a sample application based on Plack using Acme::Nyaa. Start nyaaproxy
+by plackup command like the following and open URL such as 
+`http://127.0.0.1:2222/http://ja.wikipedia.org/wiki/ネコ`.
+
+    $ plackup -o 127.0.0.1 -p 2222 -a eg/nyaaproxy.psgi
 
 # REPOSITORY
 
