@@ -46,6 +46,11 @@ my $DoNotBecomeCat = [
     'モー娘。',
 ];
 
+my $CharacterEntityReferenceMap = {
+    '&#12289;' => '、',
+    '&#12290;' => '。',
+};
+
 sub new {
     # Constructor
     my $class = shift;
@@ -95,6 +100,7 @@ sub cat {
 
     $utf8string =~ s{($RxPeriod)}{$1$Separator}g;
     $utf8string .= $Separator unless $utf8string =~ m{$Separator};
+
 
     my $hiralength = scalar @$HiraganaTails;
     my $katalength = scalar @$KatakanaTails;
@@ -279,6 +285,7 @@ sub straycat {
     return q() unless scalar @$inputlines;
 
     foreach my $r ( @$inputlines ) {
+
         # To be a cat
         if( $r =~ m|[^\x20-\x7e]+| ) {
             # Encode if any multibyte character exsits
@@ -286,6 +293,12 @@ sub straycat {
 
         } else {
             $nekobuffer .= $r;
+        }
+
+        for my $e ( keys %$CharacterEntityReferenceMap ) {
+            # Convert character entity reference to character itself.
+            next unless $nekobuffer =~ m/$e/;
+            $nekobuffer =~ s/$e/$CharacterEntityReferenceMap->{ $e }/g;
         }
 
         if( length $nekobuffer < $buffersize ) {
@@ -302,6 +315,7 @@ sub straycat {
 
         if( $nekobuffer =~ m|[^\x20-\x7e]+| ) {
             # Convert if any multibyte character exsits
+            #warn $nekobuffer;
             $nekobuffer = $self->cat( \$nekobuffer );
         }
 
