@@ -69,7 +69,7 @@ builder {
             return [ 
                 404, 
                 [ 'Content-Type' => 'text/plain' ],
-                [ 'Usage: http://127.0.0.1:2222/http://ja.wikipedia.org/柴犬' ]
+                [ 'Usage: http://127.0.0.1:2222/http://ja.wikipedia.org/wiki/柴犬' ]
             ];
         }
     };
