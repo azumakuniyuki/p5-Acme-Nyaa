@@ -5,7 +5,7 @@ use warnings;
 use utf8;
 
 my $RxComma = qr/[、(?:, )]/;
-my $RxPeriod = qr/[。]/;
+my $RxPeriod = qr/[。！]/;
 my $RxEndOfList = qr#[）)-=+|}＞>/:;"'`\]]#;
 my $RxConversation = qr/[「『].+[」』]/;
 my $RxEndOfSentence = qr/(?:[!！?？…]+|[.]{2,}|[。]{2,}|[、]{2,}|[,]{2,})/;
