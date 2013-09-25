@@ -3,8 +3,6 @@ use parent 'Acme::Nyaa';
 use strict;
 use warnings;
 use utf8;
-use Encode;
-use Encode::Guess qw(shift-jis euc-jp 7bit-jis);;
 
 my $RxComma = qr/[、(?:, )]/;
 my $RxPeriod = qr/[。]/;
@@ -46,11 +44,6 @@ my $DoNotBecomeCat = [
     'モー娘。',
 ];
 
-my $CharacterEntityReferenceMap = {
-    '&#12289;' => '、',
-    '&#12290;' => '。',
-};
-
 sub new {
     # Constructor
     my $class = shift;
@@ -80,35 +73,34 @@ sub object {
 
 sub cat {
     my $self = shift;
-    my $text = shift;
+    my $argv = shift;
+    my $flag = shift // 0;
 
-    my $beinputted = undef;
-    my $utf8string = undef;
-    my $referenced = ref $text;
-    my $guessedenc = undef;
-    my $wellformed = undef;
+    my $ref1 = ref $argv;
+    my $text = undef;
+    my $neko = undef;
+    my $nyaa = undef;
 
-    return q() if( $referenced ne '' && $referenced ne 'SCALAR' );
-    $beinputted = $referenced eq 'SCALAR' ? $$text : $text;
-    return q() unless length $beinputted;
+    return q() if( $ref1 ne '' && $ref1 ne 'SCALAR' );
+    $text = $ref1 eq 'SCALAR' ? $$argv: $argv;
+    return q() unless length $text;
 
-    $guessedenc = __PACKAGE__->reckon( \$beinputted ) || 'utf8';
-    $wellformed = $guessedenc eq 'utf8' ? utf8::is_utf8 $beinputted : undef;
+    eval { 
+        $self->reckon( \$text );
+        $neko = $self->toutf8( $text );
+    };
+    return $text if $@;
 
-    eval { $utf8string =  __PACKAGE__->toutf8( $beinputted, $guessedenc, $wellformed ); };
-    return $beinputted if $@;
-
-    $utf8string =~ s{($RxPeriod)}{$1$Separator}g;
-    $utf8string .= $Separator unless $utf8string =~ m{$Separator};
-
+    $neko =~ s{($RxPeriod)}{$1$Separator}g;
+    $neko .= $Separator unless $neko =~ m{$Separator};
 
     my $hiralength = scalar @$HiraganaTails;
     my $katalength = scalar @$KatakanaTails;
-    my $writingset = [ split( $Separator, $utf8string ) ];
+    my $writingset = [ split( $Separator, $neko ) ];
     my $haschomped = 0;
     my ( $r1,$r2 ) = 0;
 
-    foreach my $e ( @$writingset ) {
+    for my $e ( @$writingset ) {
 
         next if $e =~ m/\A$RxPeriod\s*\z/;
         next if $e =~ m/$RxEndOfList\s*\z/;
@@ -120,6 +112,7 @@ sub cat {
         next if grep { $e =~ m/$_\s*\z/ } @$FightingCats;
 
         # Do not convert if the string contain only ASCII characters.
+        # ASCII文字しか入ってない時は何もしない
         next if $e =~ m{\A[\x20-\x7E]+\z};
 
         # ひらがな、またはカタカナが入ってないなら次へ
@@ -209,59 +202,61 @@ sub cat {
         $e =~ s/[!]$RxPeriod/! /g;
         $e .= qq(\n) if $haschomped;
 
-    } # End of foreach(@$writingset)
+    } # End of for(@$writingset)
 
-    return __PACKAGE__->utf8to( join( '', @$writingset ), $guessedenc, $wellformed );
+    return $self->utf8to( join( '', @$writingset ) ) unless $flag;
+    return join( '', @$writingset );
 }
 
 sub neko {
     my $self = shift;
-    my $text = shift;
+    my $argv = shift;
+    my $flag = shift // 0;
 
-    my $beinputted = undef;
-    my $utf8string = undef;
-    my $referenced = ref $text;
-    my $guessedenc = undef;
-    my $wellformed = undef;
-    my $nounstable = undef;
+    my $ref1 = ref $argv;
+    my $text = undef;
+    my $neko = undef;
 
-    return q() if( $referenced ne '' && $referenced ne 'SCALAR' );
-    $beinputted = $referenced eq 'SCALAR' ? $$text : $text;
-    return q() unless length $beinputted;
+    return q() if( $ref1 ne '' && $ref1 ne 'SCALAR' );
+    $text = $ref1 eq 'SCALAR' ? $$argv : $argv;
+    return q() unless length $text;
 
-    $guessedenc = __PACKAGE__->reckon( \$beinputted ) || 'utf8';
-    $wellformed = $guessedenc eq 'utf8' ? utf8::is_utf8 $beinputted : undef;
 
-    eval { $utf8string = __PACKAGE__->toutf8( $beinputted, $guessedenc, $wellformed ); };
-    return $beinputted if $@;
+    eval { 
+        $self->reckon( \$text );
+        $neko = $self->toutf8( $text ); 
+    };
+    return $text if $@;
 
-    $nounstable = {
+    my $nounstable = {
         '神' => 'ネコ',
+        '神' => 'ネコ',
     };
 
-    foreach my $e ( keys %$nounstable ) {
+    for my $e ( keys %$nounstable ) {
 
-        next unless $utf8string =~ m{$e};
+        next unless $neko =~ m{$e};
         my $f = $nounstable->{ $e };
 
-        $utf8string =~ s{\A[$e]\z}{$f};
-        $utf8string =~ s{\A[$e](\p{InHiragana})}{$f$1};
-        $utf8string =~ s{\A[$e](\p{InKatakana})}{$f$1};
-        $utf8string =~ s{(\p{InHiragana})[$e](\p{InHiragana})}{$1$f$2}g;
-        $utf8string =~ s{(\p{InHiragana})[$e](\p{InKatakana})}{$1$f$2}g;
-        $utf8string =~ s{(\p{InKatakana})[$e](\p{InKatakana})}{$1$f$2}g;
-        $utf8string =~ s{(\p{InKatakana})[$e](\p{InHiragana})}{$1$f$2}g;
-        $utf8string =~ s{(\p{InHiragana})[$e]($RxPeriod|$RxComma)?\z}{$1$f$2}g;
-        $utf8string =~ s{(\p{InKatakana})[$e]($RxPeriod|$RxComma)?\z}{$1$f$2}g;
+        $neko =~ s{\A[$e]\z}{$f};
+        $neko =~ s{\A[$e](\p{InHiragana})}{$f$1};
+        $neko =~ s{\A[$e](\p{InKatakana})}{$f$1};
+        $neko =~ s{(\p{InHiragana})[$e](\p{InHiragana})}{$1$f$2}g;
+        $neko =~ s{(\p{InHiragana})[$e](\p{InKatakana})}{$1$f$2}g;
+        $neko =~ s{(\p{InKatakana})[$e](\p{InKatakana})}{$1$f$2}g;
+        $neko =~ s{(\p{InKatakana})[$e](\p{InHiragana})}{$1$f$2}g;
+        $neko =~ s{(\p{InHiragana})[$e]($RxPeriod|$RxComma)?\z}{$1$f$2}g;
+        $neko =~ s{(\p{InKatakana})[$e]($RxPeriod|$RxComma)?\z}{$1$f$2}g;
     }
 
-    return __PACKAGE__->utf8to( $utf8string, $guessedenc, $wellformed );
+    return $self->utf8to( $neko ) unless $flag;
+    return $neko;
 }
 
 sub nyaa {
     my $self = shift;
-    my $data = shift || q();
-    my $text = ref $data ? $$data : $data;
+    my $argv = shift || q();
+    my $text = ref $argv ? $$argv : $argv;
     my $nyaa = [];
 
     push @$nyaa, @$KatakanaTails, @$HiraganaTails;
@@ -270,35 +265,44 @@ sub nyaa {
 
 sub straycat {
     my $self = shift;
-    my $data = shift // return q();
+    my $argv = shift // return q();
     my $noun = shift // 0;
 
-    my $reference1 = ref $data;
-    my $inputlines = [];
-    my $outputtext = q();
+    my $ref1 = ref $argv;
+    my $data = [];
+    my $text = q();
+
     my $nekobuffer = q();
     my $leftbuffer = q();
     my $buffersize = 144;
+    my $entityrmap = {
+        '&#12289;' => '、',
+        '&#12290;' => '。',
+    };
 
-    return q() unless $reference1 =~ m/(?:ARRAY|SCALAR)/;
-    push @$inputlines, $reference1 eq 'ARRAY' ? @$data : $$data;
-    return q() unless scalar @$inputlines;
+    return q() unless $ref1 =~ m/(?:ARRAY|SCALAR)/;
+    push @$data, $ref1 eq 'ARRAY' ? @$argv : $$argv;
+    return q() unless scalar @$data;
 
-    foreach my $r ( @$inputlines ) {
+    for my $r ( @$data ) {
 
         # To be a cat
         if( $r =~ m|[^\x20-\x7e]+| ) {
             # Encode if any multibyte character exsits
-            $nekobuffer .= Encode::decode_utf8 $r unless utf8::is_utf8 $r;
+            eval { 
+                $self->reckon( \$r );
+                $nekobuffer .=  $self->toutf8( $r );
+            };
+            next if $@;
 
         } else {
             $nekobuffer .= $r;
         }
 
-        for my $e ( keys %$CharacterEntityReferenceMap ) {
+        for my $e ( keys %$entityrmap ) {
             # Convert character entity reference to character itself.
             next unless $nekobuffer =~ m/$e/;
-            $nekobuffer =~ s/$e/$CharacterEntityReferenceMap->{ $e }/g;
+            $nekobuffer =~ s/$e/$entityrmap->{ $e }/g;
         }
 
         if( length $nekobuffer < $buffersize ) {
@@ -315,64 +319,48 @@ sub straycat {
 
         if( $nekobuffer =~ m|[^\x20-\x7e]+| ) {
             # Convert if any multibyte character exsits
-            #warn $nekobuffer;
-            $nekobuffer = $self->cat( \$nekobuffer );
+            $nekobuffer = $self->cat( \$nekobuffer, 1 );
         }
 
         if( $noun ) {
             # Convert noun
-            $nekobuffer = $self->neko( \$nekobuffer ) if $nekobuffer =~ m|[^\x20-\x7e]+|;
-            $leftbuffer = $self->neko( \$leftbuffer ) if $leftbuffer =~ m|[^\x20-\x7e]+|;
+            $nekobuffer = $self->neko( \$nekobuffer, 1 ) if $nekobuffer =~ m|[^\x20-\x7e]+|;
+            $leftbuffer = $self->neko( \$leftbuffer, 1 ) if $leftbuffer =~ m|[^\x20-\x7e]+|;
         }
 
-        $outputtext .= Encode::encode_utf8 $nekobuffer if utf8::is_utf8 $nekobuffer;
+        $text .= $nekobuffer;
         $nekobuffer  = $leftbuffer;
         $leftbuffer  = q();
     }
 
-    if( length $nekobuffer ) {
-
-        $outputtext .= Encode::encode_utf8 $nekobuffer if utf8::is_utf8 $nekobuffer;
-    }
-    return $outputtext;
+    $text .= $nekobuffer if length $nekobuffer;
+    return $self->utf8to( $text );
 }
 
 sub reckon {
-    my $class = shift;
-    my $text0 = shift;
+    # Recognize text encoding
+    my $self = shift;
+    my $argv = shift;
 
-    my $referenced = ref $text0;
-    my $beinputted = $referenced eq 'SCALAR' ? $$text0 : $text0;
-    return q() unless length $beinputted;
+    my $ref1 = ref $argv;
+    my $text = $ref1 eq 'SCALAR' ? $$argv: $argv;
+    return q() unless length $text;
 
-    my $guessedenc = Encode::Guess->guess( $beinputted );
-    return q() unless ref $guessedenc;
-    return $guessedenc->name;
-}
+    use Encode::Guess qw(shiftjis euc-jp 7bit-jis);
+    $self->{'utf8flag'} = utf8::is_utf8 $text;
 
-sub toutf8 {
-    my $class = shift;
-    my $text0 = shift // return q();
-    my $guess = shift || __PACKAGE__->reckon( \$text0 );
-    my $uflag = shift // 0;
+    my $code = Encode::Guess->guess( $text );
+    my $name = q();
+    return q() unless ref $code;
 
-    return $text0 unless $guess;
+    # What encoding
+    $name = $code->name;
+    $name = $1 if $name =~ m/\A(.+) or .+/;
 
-    Encode::from_to( $text0, $guess, 'utf8' ) if $guess ne 'utf8';
-    $uflag = utf8::is_utf8($text0);
-    $text0 = Encode::decode_utf8 $text0 unless $uflag;
-    return $text0;
-}
-
-sub utf8to {
-    my $class = shift;
-    my $text0 = shift // return q();
-    my $guess = shift || return $text0;
-    my $uflag = shift // 0;
-
-    $text0 = Encode::encode_utf8 $text0 if( $uflag == 0 && utf8::is_utf8 $text0 );
-    Encode::from_to( $text0, 'utf8', $guess ) if $guess ne 'utf8';
-    return $text0;
+    if( $name ne 'ascii' ) {
+        $self->{'encoding'} ||= $name;
+    }
+    return $self->{'encoding'};
 }
 
 1;
