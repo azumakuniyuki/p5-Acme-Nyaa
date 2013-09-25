@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use 5.010001;
+use Encode;
 use Module::Load;
 
 use version; our $VERSION = qv('0.0.9');
@@ -18,6 +19,8 @@ sub new {
     $argvs->{'language'} ||= $Default;
     $argvs->{'loaded-languages'} = [];
     $argvs->{'objectid'} = int rand 2**24;
+    $argvs->{'encoding'} = q();
+    $argvs->{'utf8flag'} = undef;
 
     my $nyaan = bless $argvs, __PACKAGE__;
     my $klass = $nyaan->loadmodule( $argvs->{'language'} );
@@ -127,7 +130,7 @@ sub findobject {
 
     return unless length $name;
 
-    foreach my $e ( @$objs ) {
+    for my $e ( @$objs ) {
 
         next unless ref($e) eq $name;
         $this = $e;
@@ -140,6 +143,47 @@ sub findobject {
     return $this;
 }
 
+sub reckon {
+    # Implement at sub class
+    my $self = shift;
+    return $self->{'encoding'};
+}
+
+sub toutf8 {
+    my $self = shift;
+    my $argv = shift;
+    my $text = undef;
+
+    $text = ref $argv ? $$argv : $argv;
+    return $text unless length $text;
+
+    $self->reckon( \$text );
+    return $text unless $self->{'encoding'};
+
+    if( not $self->{'encoding'} =~ m/(?:ascii|utf8)/ ) {
+        Encode::from_to( $text, $self->{'encoding'}, 'utf8' );
+    }
+
+    $text = Encode::decode_utf8 $text unless utf8::is_utf8 $text;
+    return $text;
+}
+
+sub utf8to {
+    my $self = shift;
+    my $argv = shift;
+    my $text = undef;
+
+    $text = ref $argv ? $$argv : $argv;
+    return $text unless $self->{'encoding'};
+    return $text unless length $text;
+
+    $text = Encode::encode_utf8 $text if utf8::is_utf8 $text;
+    if( $self->{'encoding'} ne 'utf8' ) {
+        Encode::from_to( $text, 'utf8', $self->{'encoding'} );
+    }
+
+    return $text;
+}
 
 1;
 __END__
