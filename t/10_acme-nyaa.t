@@ -1,6 +1,8 @@
 use strict;
+use warnings;
+use lib './lib';
 use utf8;
-use Test::More 'tests' => 18;
+use Test::More;
 
 BEGIN { use_ok 'Acme::Nyaa' }
 
@@ -43,4 +45,5 @@ foreach my $e ( @$language ) {
     isa_ok( $p, $c, sprintf( "->findobject(1) = %s", $c ));
 }
 
-
+done_testing;
+__END__
