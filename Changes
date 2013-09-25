@@ -1,5 +1,9 @@
 Revision history for Perl extension Acme::Nyaa
 
+0.0.10  Wed, 25 Sep 2013 19:22:22 +0900 (JST)
+    - Convert a character entity reference to a character itself for parsing HTML.
+    - Support Shift-JIS, ISO-2022-JP, and EUC-JP at Acme::Nyaa::Ja.
+
 0.0.9   Thu, 19 Sep 2013 00:22:22 +0900 (JST)
     - Tiny code refactoring at Acme::Nyaa::Ja.
     - Sample PSGI application: eg/nyaaproxy.psgi
