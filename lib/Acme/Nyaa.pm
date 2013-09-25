@@ -6,7 +6,7 @@ use 5.010001;
 use Encode;
 use Module::Load;
 
-use version; our $VERSION = qv('0.0.9');
+use version; our $VERSION = qv('0.0.10');
 my $Default = 'ja';
 
 sub new {
