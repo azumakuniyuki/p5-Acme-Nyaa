@@ -158,6 +158,7 @@ sub toutf8 {
     return $text unless length $text;
 
     $self->reckon( \$text );
+    return $text if $self->{'utf8flag'};
     return $text unless $self->{'encoding'};
 
     if( not $self->{'encoding'} =~ m/(?:ascii|utf8)/ ) {
